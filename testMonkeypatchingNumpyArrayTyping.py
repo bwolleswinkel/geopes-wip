@@ -58,7 +58,7 @@ Rectangle = Literal['rectangle']
 
 # Now this works without Pylance warnings!
 a: NDArray[Float, Shape['square']] = np.zeros((3, 3))  # Square array
-b: NDArray[Float, Shape['rectangle']] = np.zeros((3, 2))  # Rectangle array
+b: NDArray[Float] = np.zeros((3, 2))  # Rectangle array
 
 print(f"Array a shape: {a.shape} - should be square")
 print(f"Array b shape: {b.shape} - should be rectangle")
