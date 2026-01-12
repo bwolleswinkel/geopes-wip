@@ -79,14 +79,16 @@ class Axes1D(Axes):
         if 'linewidth' not in kwargs and 'lw' not in kwargs:
             kwargs['linewidth'] = 2
         # Handle case where only x-values are provided
+        # FIXME: What about NumPy arrays? Can you do length there?
         if len(args) == 1 and not isinstance(args[0], str):
             # Single argument that's not a format string - assume it's x-data
             x_data = args[0]
             y_data = np.zeros_like(x_data)
             args = (x_data, y_data)
-        elif len(args) >= 2:
+        # FIXME: This actually should raise an error, because we only want 1D plots...
+        elif len(args) >= 2 and not isinstance(args[1], str):
             # Standard case - x and y data provided
-            pass
+            raise ValueError("Axes1D only supports 1D plots with a single argument for x data")
         # Call parent plot method
         return super().plot(*args, **kwargs)
     
