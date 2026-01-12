@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
 
+# FROM: GitHub Copilot Claude Sonnet 4 | 2026/01/12
+
+
 class Axes1D(Axes):
     """A custom 1D axis class that inherits from matplotlib Axes.
     

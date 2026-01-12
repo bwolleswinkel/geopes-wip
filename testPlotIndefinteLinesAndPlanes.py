@@ -5,6 +5,10 @@ from numpy.typing import ArrayLike
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
+
+# FROM: GitHub Copilot Claude Sonnet 4 | 2026/01/12
+
+
 def plot_line(ax, line: ArrayLike, point: ArrayLike = None, **kwargs) -> None:
     """Plot an indefinite line in 2D or 3D, defined by a point and a direction vector"""
 
