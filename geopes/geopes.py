@@ -15,6 +15,7 @@
 ### TODO: Check out documentation 'Standard operators as functions', https://docs.python.org/3/library/operator.html
 ### TODO: Check out `pycvxset: A Python package for convex set manipulation`, https://arxiv.org/html/2410.11430v1
 ### TODO: Check out `MPT3` toolbox, https://www.mpt3.org/pmwiki.php/Main/HowTos
+    # FROM: https://www.mpt3.org/pmwiki.php/Geometry/OperationsWithPolyhedra
 ### TODO: Check out `PnPMPC-TOOLBOX', from `http://sisdin.unipv.it/pnpmpc/pnpmpc.php'
     - Check out e_MRPI to go from a Polytopic to an outer, simpler approximation
 ### TODO: Check out `Basic Properties of Convex Polytopes, Henk Martin
@@ -46,6 +47,15 @@
 ### TODO: Check out "Linear Matrix Inequalities in System and Control Theory," Boyd et al. (1994) specifically 5.2.1 Smallest invariant ellipsoid containing a polytope, and 5.2.2 Largest invariant ellipsoid contained in a polytope
 
 ### TODO: Check out "Algorithms for Ellipsoids," Pope (2008), written in Fortran
+
+### TODO: Check out "Affine equivalence" between polytopes
+    # They also list all the polytope algorithms: inductive algorithms (inserting vertices, using a so-called beneath-beyond technique), projection algorithms (known as Fourier–Motzkin elimination or double description algorithms), and reverse search methods
+    # 0-D face: vertex
+    # 1-D face: edge
+    # (n-2)-D face: ridges
+    # (n-1)-D face: facets
+    # They have a lot of other implementations which are 'nice to have' as well: product, join, subdirect sum, direct sum, prism, pyramid, bipyramid, Lawrence extension, wedge, 
+# FROM: "Basic Properties of Convex Polytopes," Henk Martin
 
 ### TODO: Check out the software package 'polymake'
 # FROM: https://polymake.org/doku.php/start
@@ -226,6 +236,7 @@ class Polytope(ConvexRegion):
         self._vol: float | None  = None
         self._com: ArrayLike | None = None   ### FIXME: Center of mass of the polytope. This should be called the centroid, right?
         self._n: int = A.shape[1]  ### FIXME: Placeholder
+        self.is_fulldim: bool | None = None
         self.is_degen: bool | None = None  ### FIXME: Not that we have two types of degeneracy, whenever self.vol = 0 (type I degeneracy), or when self.vol = np.inf (type II degeneracy). Should `self.is_degen` therefore be a flag or give two different values?
         ### FIXME: Also look into "Representation of unbounded polytopes" from wikipedia, about vertex representation with 'bounding rays', seems quite interesting. This is yet another representation of polytopes, which is neither H- nor V-representation.
         self.is_min_repr: bool | None = None  ### FIXME: This should also maybe be the flag `is_min_repr` instead?
@@ -327,7 +338,11 @@ class Polytope(ConvexRegion):
     
     @property
     def vol(self) -> float:
-        """Compute the volume of the polytope."""
+        """Compute the volume of the polytope"""
+        # TODO: Also look into triangulation methods for volume computation
+        # TODO: What about lower-dimensional volumes?
+        # FIXME: What about surface area/perimeter?
+        # FROM: "Basic Properties of Convex Polytopes", Henk Martin | Contains a formula for volume
         if self._vol is None:
             ...
         raise NotImplementedError
@@ -494,6 +509,7 @@ class Polytope(ConvexRegion):
         """Scale the polytope by a factor -1, i.e., the negation operator -P. Note that this is scaling around the origin.
 
         """
+        ### FIXME: This might be really dangerous, because if misused, people can mistake this for the Pontryagin difference.
         return -1 * self
     
     def __pow__(self, power: int) -> Box:
@@ -658,7 +674,14 @@ class Polytope(ConvexRegion):
     
     def to_graph(self):
         """Convert the polytope to a Hasse diagram"""
+        ### TODO: See also 'facet-vertex incidence matrix', "Basic Properties of Convex Polytopes," Henk Martin
         ### FIXME: Maybe more explicit? Like `to_hasse_diagram`?
+        ### TODO: Also look into Gale diagrams | "The computation of a Gale diagram involves only simple linear algebra"
+        raise NotImplementedError
+    
+    def to_polar(self) -> Polytope:
+        """Compute the polar polytope P° of the polytope P."""
+        # FROM: "Basic Properties of Convex Polytopes," Henk Martin
         raise NotImplementedError
     
     def to_H_repr(self, in_place: bool = True) -> None | Polytope:
@@ -744,6 +767,10 @@ class Polytope(ConvexRegion):
         exec(f'ax.set_{dim}lim({ax_lims[dim][0]}, {ax_lims[dim][1]})' for dim in ['x', 'y', 'z'][:self.n])
         if show:
             plt.show()
+        raise NotImplementedError
+    
+    def schlegel(self):
+        """Compute a Schlegel diagram of the polytope, if possible"""
         raise NotImplementedError
 
 
@@ -1087,6 +1114,8 @@ def extreme(poly: Polytope) -> ArrayLike:
 
 def normalize():
     """### FIXME: I don't know what this should do, see `MPT3` package for reference. https://people.ee.ethz.ch/~mpt/2/docs/refguide/mpt/@polytope/normalize.html
+
+    This ensure that if {x | A x <= b} is the H-representation of the polytope, then each row i of A and b satisfy ‖A_i‖_2 = 1.
     
     """
     raise NotImplementedError
@@ -1518,7 +1547,7 @@ class Subspace(ConvexRegion):
     __array_ufunc__ = None
     
     def __add__(self, other: Subspace) -> Subspace:
-        """Implements the magic method `+` as the (Mikowski) addition, also known as the direct sum, of two subspaces V = `self` and W = `other`.
+        """Implements the magic method `+` as the (Minkowski) addition, also known as the direct sum, of two subspaces V = `self` and W = `other`.
         
         References
         ----------
@@ -1919,6 +1948,8 @@ class Sphere(Ellipsoid):
 
 def ellps_from_normal(mean: ArrayLike, Sigma: ArrayLike, a: float) -> Ellipsoid:
     """Convert a normal distribution N(`mean`, `Sigma`) to an ellipsoid of `a` times the standard deviation.
+
+    ### FIXME: Maybe call this `ellps_from_gauss` instead? Or maybe just `ellps_from_cov`?
     
     Parameters
     ----------
