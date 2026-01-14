@@ -152,26 +152,6 @@ class Polytope():
     verts: NDArray[Float]
         The matrix of shape (n, k) defining the k vertices in V-representation.
 
-    Examples
-    --------
-    Initialize a polytope from vertices (V-representation):
-    >>> verts = np.array([[0, 0], [1, 0], [0, 1]])
-    >>> poly = pes.poly(verts)
-    >>> print(poly)
-    Polytope with 3 vertices in R^2
-
-    Initialize a polytope from half-spaces (H-representation):
-    >>> A = np.array([[1, 0], [0, 1], [-1, 0], [0, -1]])
-    >>> b = np.array([1, 1, 0, 0])
-    >>> poly = pes.poly(A, b)
-    >>> print(poly)
-    Polytope defined by 4 half-spaces in R^2
-
-    Initialize an empty polytope in R^n:
-    >>> poly = pes.poly(n=3)
-    >>> print(poly)
-    Empty polytope in R^3
-
     """
 
     def __init__(self, *args, n: int | None = None, rays: NDArray | None = None) -> None:
@@ -194,6 +174,26 @@ class Polytope():
         ValueError
             If the number of arguments is invalid or if `n` is not provided when initializing an empty polytope.
 
+        Examples
+        --------
+        Initialize a polytope from vertices (V-representation):
+        >>> verts = np.array([[0, 0], [1, 0], [0, 1]])
+        >>> poly = pes.poly(verts)
+        >>> print(poly)
+        Polytope with 3 vertices in R^2
+
+        Initialize a polytope from half-spaces (H-representation):
+        >>> A = np.array([[1, 0], [0, 1], [-1, 0], [0, -1]])
+        >>> b = np.array([1, 1, 0, 0])
+        >>> poly = pes.poly(A, b)
+        >>> print(poly)
+        Polytope defined by 4 half-spaces in R^2
+
+        Initialize an empty polytope in R^n:
+        >>> poly = pes.poly(n=3)
+        >>> print(poly)
+        Empty polytope in R^3
+        
         """
         match len(args):
             case 0:
@@ -233,4 +233,4 @@ def poly_tightwrap(*args, **kwargs) -> Polytope:
 
 def main():
     _ = poly_functools(n=3)  # This provides "(function) poly: _Wrapped[(self: Polytope, *args: Any, n: int | None = None, rays: NDArray | None = None), None, ..., Polytope]" with Pylance
-    _ = poly_tightwrap(n=3)    # Provides the proper signature!!! Oh no wait... it doesn't update properly?
+    _ = poly_tightwrap(n=3)    # Provides the proper signature!!!
