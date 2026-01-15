@@ -9,7 +9,7 @@ from numpy.typing import NDArray
 from testDocstringWrappers import tightwrap_wraps
 
 
-# Add a multiple dispatching decorator
+# FROM: GitHub Copilot, Claude Sonnet 4 | 2026/01/15
 def multipledispatch(func: Callable[[Any], Any]) -> Callable[[Any], Any]:
     """Decorator that enables multiple dispatch functionality for a function or method.
     
