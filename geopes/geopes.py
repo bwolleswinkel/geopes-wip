@@ -2075,6 +2075,15 @@ def atleast_2d_col(arr: ArrayLike) -> ArrayLike:
         return arr.reshape(-1, 1)
     else:
         return arr
+    
+
+def weighted_norm(x: ArrayLike, W: ArrayLike) -> ArrayLike:
+    """Compute the weighted norm of a vector `x` with weight matrix `W`, i.e., ‖x‖_W = sqrt(x^T W x)."""
+    if not is_pos_def(W, allow_semidef=True):
+        raise ValueError("Weight matrix W must be positive (semi)definite")
+    if not is_pos_def(W):
+        warnings.warn("Weight matrix W is not strictly positive definite. The weighted norm will become a semi-norm.", UserWarning)
+    return np.sqrt(np.dot(x.T, np.dot(W, x)))
 
 
 def signed_angle(v_1: ArrayLike, v_2: ArrayLike, look: ArrayLike | None = None) -> float:
