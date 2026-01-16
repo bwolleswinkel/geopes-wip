@@ -48,6 +48,9 @@
 
 ### TODO: Check out "Algorithms for Ellipsoids," Pope (2008), written in Fortran
 
+### TODO: Check out the Upper Bound Theorem, on a relation between the number of vertices, facets, and dimension of a polytope
+# FROM: https://en.wikipedia.org/wiki/Upper_bound_theorem
+
 ### TODO: Check out "Affine equivalence" between polytopes
     # They also list all the polytope algorithms: inductive algorithms (inserting vertices, using a so-called beneath-beyond technique), projection algorithms (known as Fourier–Motzkin elimination or double description algorithms), and reverse search methods
     # 0-D face: vertex
@@ -1043,6 +1046,8 @@ def scale(poly: Polytope, factor: float, center: str = 'origin') -> Polytope:
     ### FIXME: Should we make this a method of the polytope self instead? And have the method `P.scale(a, in_place=True)`?
 
     ### FIXME: Also maybe scaling just relative to a vector point
+
+    ### FIXME: Maybe rename 'center' to 'relative_to'? And then instead of str = 'origin', we have `center: NDArray | None = None`, where None means origin? Such that we can do `poly.scale(a, relative_to=poly.center('com'))` for example
     
     Parameters
     ----------
@@ -2059,6 +2064,17 @@ def span(A: ArrayLike) -> ArrayLike:
         if np.linalg.matrix_rank(np.column_stack((*basis, A[:, i]))) > len(basis):
             basis.append(A[:, i])
     return np.column_stack(basis)
+
+
+def atleast_2d_col(arr: ArrayLike) -> ArrayLike:
+    """Convert scalars/1D arrays to column vectors, and leave ND arrays (where N >= 2) unchanged"""
+    arr = np.asarray(arr)
+    if arr.ndim < 1:
+        return arr.reshape(1, 1)
+    elif arr.ndim == 1:
+        return arr.reshape(-1, 1)
+    else:
+        return arr
 
 
 def signed_angle(v_1: ArrayLike, v_2: ArrayLike, look: ArrayLike | None = None) -> float:
