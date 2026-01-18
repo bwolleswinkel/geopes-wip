@@ -27,6 +27,9 @@
     - Gabriel: Hmm might be tricky, as there's many definition; he used quadratic cones, of the form x^T Q x < 0
     - Gabriel: I actually have some checks for (quadratic) cones, might be interesting to look at
 
+### TODO: Look into (polytopic) cones, which are cone(ray_1, ray_2, ..., ray_k), i.e., the positive combinations of the rays as in the Minkowski-Weyl theorem
+    - Would also be really nice to make a visual representation for these cones, and how the cone operation works on convex hulls
+
 ### TODO: Check out `Ellipsoidal Calculus for Estimation and Control', https://link-springer-com.tudelft.idm.oclc.org/book/9780817636999
 ### TODO: Check out `Ellipsoidal Toolbox (ET)', https://www.mathworks.com/matlabcentral/fileexchange/21936-ellipsoidal-toolbox-et
 

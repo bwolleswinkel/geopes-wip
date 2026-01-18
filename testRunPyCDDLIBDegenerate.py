@@ -8,13 +8,15 @@ import cdd
 # ------ FUNCTIONS ------
 
 
-def enum_facets(verts: NDArray) -> NDArray:
+def enum_facets(verts: NDArray, rays: NDArray | None = None) -> NDArray:
     """Enumerate the facets of a polytope defined by its vertices using pycddlib.
     
     Parameters
     ----------
     verts : NDArray
         An (n, k) array of n vertices in k-dimensional space.
+    rays : NDArray | None
+        An (n, l) array of n rays in k-dimensional space, or None if there are no rays.
         
     Returns
     -------
@@ -22,8 +24,11 @@ def enum_facets(verts: NDArray) -> NDArray:
         An (m, n + 1) array of m facet normals.
     
     """
-    # Create cdd matrix from vertices
-    mat = cdd.matrix_from_array(np.column_stack((np.ones(verts.shape[1]), verts.T)), rep_type=cdd.RepType.GENERATOR)
+    # Create cdd matrix from vertices and the rays (if any)
+    if rays is not None:
+        mat = cdd.matrix_from_array(np.column_stack((np.ones(verts.shape[1] + rays.shape[1]), np.hstack((verts, rays)).T)), rep_type=cdd.RepType.GENERATOR)
+    else:
+        mat = cdd.matrix_from_array(np.column_stack((np.ones(verts.shape[1]), verts.T)), rep_type=cdd.RepType.GENERATOR)
     poly = cdd.polyhedron_from_matrix(mat)
     
     # Get inequalities (facets)
@@ -89,6 +94,9 @@ def main() -> None:
     
     Ab_single_point = enum_facets(V_single_point)
     print(f"Facets for single point:\n{Ab_single_point + 0}\n")  # NOTE: Incorrect/insufficient facets
+    V_single_point_reconstructed, rays_single_point_reconstructed = enum_verts(Ab_single_point)
+    print(f"Reconstructed vertices for single point:\n{V_single_point_reconstructed + 0}")
+    print(f"Reconstructed rays for single point:\n{rays_single_point_reconstructed + 0}\n")  # NOTE: Should be zero, returns [1, 0] and [0, 1]. This does correspond with the input facets, but those facets are incorrect for a single point
 
     V_empty = np.empty((2, 0))  # No vertices in 2D space
 
@@ -102,12 +110,18 @@ def main() -> None:
 
     Ab_line = enum_facets(V_line)
     print(f"Facets for line segment:\n{Ab_line + 0}\n")  # NOTE: Incorrect/insufficient facets
+    V_line_reconstructed, rays_line_reconstructed = enum_verts(Ab_line)
+    print(f"Reconstructed vertices for line segment:\n{V_line_reconstructed + 0}")  # NOTE: Only returns [1, 2], should return both endpoints [1, 1] and [2, 2] (and only those)
+    print(f"Reconstructed rays for line segment:\n{rays_line_reconstructed + 0}\n")  # NOTE: Should be zero, returns [1, 0] and [0, 1]. This does correspond with the input facets, but those facets are incorrect for a single point
 
     A_unbounded_single_vert_origin, b_unbounded_single_vert_origin = np.array([[-1, 0], [0, -1]]), np.array([0, 0])  # Unbounded polyhedron (first quadrant) in 2D space 
 
     V_unbounded_single_vert_origin, rays_unbounded_single_vert_origin = enum_verts(np.column_stack((A_unbounded_single_vert_origin, b_unbounded_single_vert_origin)))
     print(f"Vertices for unbounded polyhedron:\n{V_unbounded_single_vert_origin + 0}")  # NOTE: Incorrect return type; only returns the rays, not the vertex at [0, 0]
     print(f"Rays for unbounded polyhedron:\n{rays_unbounded_single_vert_origin + 0}\n")
+
+    Ab_unbounded_single_vert_origin_reconstructed = enum_facets(V_unbounded_single_vert_origin, rays_unbounded_single_vert_origin)
+    print(f"Reconstructed facets for unbounded polyhedron:\n{Ab_unbounded_single_vert_origin_reconstructed + 0}\n")  # NOTE: Here, I get something completely different than the input facets...
 
     A_unbounded_single_vert_not_origin, b_unbounded_single_vert_not_origin = np.array([[-1, 0], [0, -1]]), np.array([-1, -1])  # Unbounded polyhedron [x_1 >= 1, x_2 >= 1] in 2D space 
 
