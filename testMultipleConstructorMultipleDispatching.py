@@ -6,7 +6,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 # This is just to test the methods `poly` and `poly_from_verts` at the end
-from testDocstringWrappers import tightwrap_wraps
+from testDocstringWrappers import tightwrap_wraps as wraps
 
 
 # FROM: GitHub Copilot, Claude Sonnet 4 | 2026/01/15
@@ -255,15 +255,21 @@ class Polytope():
         print(f"Initialized polytope from {A.shape[0]} half-spaces in R^{self.n}")
     
 
-@tightwrap_wraps(Polytope.__init__)
+@wraps(Polytope.__init__)
 def poly(*args: tuple[Never] | tuple[NDArray] | tuple[NDArray, NDArray], **kwargs) -> Polytope:
     return Polytope(*args, **kwargs)
 
 
-@tightwrap_wraps(Polytope._init_from_verts)
+@wraps(Polytope._init_from_verts)
 def poly_from_verts(verts: NDArray, rays: NDArray | None = None) -> Polytope:
     """Create a Polytope from vertices (V-representation)"""
     return Polytope(verts=verts, rays=rays)
+
+
+@wraps(Polytope._init_hrepr)
+def poly_from_ineq(A: NDArray, b: NDArray, **kwargs) -> Polytope:
+    """Create a Polytope from half-spaces (H-representation)"""
+    return Polytope(A, b, **kwargs)
 
 
 def main() -> None:
@@ -274,11 +280,11 @@ def main() -> None:
 
     verts = np.array([[0, 0], [1, 0], [0, 1]])
 
-    P_1 = poly(n=2)  # FIXME: The docstring is correct, but why is the signature here not shown correctly? "(function) def poly(Any) -> Polytope" | Any should be "(*args: ..., ...)"
+    P_1 = poly(n=2)  # FIXME: The docstring is correct, but why is the signature here not shown correctly? "(function) def poly(Any) -> Polytope" | Any should be "(*args: ..., ...)" | It is shown correctly in testDocstringWrappers.py
     P_2a = Polytope(verts)
     P_2b = Polytope(verts=verts, rays=None)
     P_2c = poly_from_verts(verts)
-    P_3 = Polytope(A, b)
+    P_3 = poly_from_ineq(A, b)
     try:
         P_4 = Polytope(n=2, A=A, b=b)  # This has both required (A,b) and forbidden (n) for kwargs dispatcher
     except Exception as e:
