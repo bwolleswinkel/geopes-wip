@@ -2290,6 +2290,15 @@ class IncompatibleTypes(TypeError):
         super().__init__(self.message)
 
 
+class UndefinedOperationError(NotImplementedError):
+    """Exception raised for undefined operations between objects"""
+
+    def __init__(self, message: str = "operation is undefined for the given objects"):
+        """Constructor for the exception"""
+        self.message = message
+        super().__init__(self.message)
+
+
 def plot(obj: Polytope | Ellipsoid | Subspace, ax: plt.Axes = None) -> list[plt.Figure, plt.Axes]:
     """Method to plot either a polytope, a ellipsoid, or a subspace.
 
