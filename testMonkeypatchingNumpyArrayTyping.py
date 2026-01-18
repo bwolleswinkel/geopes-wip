@@ -58,7 +58,7 @@ A: NDArray[float, Shape['m', 'n'], float] = np.zeros((3, 2))
 b: NDArray[Shape['m'], int] = np.zeros(4)
 c: NDArray[Shape[3, ...], int] = np.zeros(4)  # Use ... to specify any number of dimensions, of any size
 d: NDArray[Shape[Any, Any], float | bool] = np.zeros((2, 2))  # Use Any to specify any size in that dimension (without giving it a name)
-verts: NDArray[float, Shape['n', 'k']] = np.zeros((5, 3))
+verts: NDArray[Shape['n', ...], int] = np.zeros((5, 3))
 
 print(f"Array a shape: {a.shape} - should be square")
 print(f"Array b shape: {b.shape} - should be rectangle")
