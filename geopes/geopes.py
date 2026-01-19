@@ -33,6 +33,8 @@
 ### TODO: Check out `Ellipsoidal Calculus for Estimation and Control', https://link-springer-com.tudelft.idm.oclc.org/book/9780817636999
 ### TODO: Check out `Ellipsoidal Toolbox (ET)', https://www.mathworks.com/matlabcentral/fileexchange/21936-ellipsoidal-toolbox-et
 
+### TODO: Check out the Birkhoff polytope
+
 ### TODO: Gabriel: Check ellipsoidal containment with LMIs
 ### TODO: Allow for ellipsoids to be degenerate (also INFINITE measure, so ellipsoid), cite Ross's paper (check Gabriel STC)
     - Think about the matrix inverse, degeneracy of two types
@@ -172,6 +174,28 @@ class ConvexRegion(ABC):
     @abstractmethod
     def vol(self):
         """The n-dimensional volume (Lebesgue measure) of the convex region."""
+        pass
+
+    @abstractmethod
+    def __contains__(self, point: ArrayLike) -> bool:
+        """Check if a point is contained in the convex region.
+        
+        Parameters
+        ----------
+        point : ArrayLike
+            The point to be checked for inclusion.
+
+        Returns
+        -------
+        bool
+            True if the point is in the convex region, False otherwise.
+
+        Raises
+        ------
+        DimensionError
+            If the dimensions of the point does not match the convex region.
+
+        """
         pass
 
 
@@ -1582,6 +1606,9 @@ class Subspace(ConvexRegion):
             raise DimensionError(f"Cannot compute intersection of subspaces of different dimensions: {self.n} and {other.n}")
         else:
             return subs_intersection(self, other)
+        
+    def __contains__(self, point: ArrayLike) -> bool:
+        raise NotImplementedError
     
     def __eq__(self, other: Subspace) -> bool:
         return np.linalg.matrix_rank(self.basis) == np.linalg.matrix_rank(np.hstack((self.basis, other.basis))) == np.linalg.matrix_rank(other.basis)
@@ -1882,6 +1909,9 @@ class Ellipsoid(ConvexRegion):
             else:
                 self._vol = (np.pi ** (self.n / 2) / np.math.gamma(self.n / 2 + 1)) / np.sqrt(np.linalg.det(self.P))
         return self._vol
+    
+    def __contains__(self, point: ArrayLike) -> bool:
+        raise NotImplementedError
     
     def __str__(self) -> str:
         ### FIXME: Placeholder
