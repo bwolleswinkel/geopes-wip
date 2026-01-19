@@ -160,19 +160,19 @@ class ConvexRegion(ABC):
     
     @property
     @abstractmethod
-    def n(self):
+    def n(self) -> int:
         """The dimension of the space in which the convex region lives."""
         pass
 
     @property
     @abstractmethod
-    def dim(self):
+    def dim(self) -> int:
         """The dimension of the convex region itself, which can be different (i.e., equal or smaller) from the ambient space dimension."""
         pass
 
     @property
     @abstractmethod
-    def vol(self):
+    def vol(self) -> float:
         """The n-dimensional volume (Lebesgue measure) of the convex region."""
         pass
 
