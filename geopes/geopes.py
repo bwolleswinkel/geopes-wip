@@ -1505,7 +1505,7 @@ class Subspace(ConvexRegion):
             case 0:
                 if n is not None and basis is None:
                     ### FIXME: Having the zero vector here is NOT correct! We should instead have an empty basis, as the zero vector CANNOT be a part of a basis (it not being linearly independent)!
-                    basis = np.array([]).reshape((n, 0))
+                    basis = np.empty((n, 0))
                 elif n is not None and basis is not None:
                     raise ValueError("Cannot specify both 'n' and 'basis' when no positional arguments are given")
             case 1:
