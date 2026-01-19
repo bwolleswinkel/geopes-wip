@@ -157,6 +157,7 @@ class ConvexRegion(ABC):
     """A base class for convex regions, which can be inherited by other classes such as Polytope, Ellipsoid, etc.
     
     """
+    # TODO: What about the concept of 'distance'? Does this make sense for every convex set? Hausdorff distance?
     
     @property
     @abstractmethod
@@ -939,6 +940,12 @@ def norm_to_poly(norm: float, n: int, p: float | str = 'inf') -> Polytope | Elli
 
 def convex_hull() -> ArrayLike[float]:
     """Compute the convex hull of a set of points"""
+    raise NotImplementedError
+
+
+def dist(self: ConvexRegion, other: ConvexRegion) -> float:
+    """Compute the distance between two convex regions"""
+    # FIXME: Look into Subspaces, might simply be || P1 - P2 ||, where P1 and P2 are projection matrices
     raise NotImplementedError
 
 
