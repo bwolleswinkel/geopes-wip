@@ -22,6 +22,9 @@
 ### TODO: Check out `contrained zonotopes', and `hybrid zonzotpes' (zonoLAB), https://github.com/ESCL-at-UTD/zonoLAB 
 ### TODO: Check out `Ellipsotopes', https://ieeexplore-ieee-org.tudelft.idm.oclc.org/stamp/stamp.jsp?arnumber=9832489
 
+### TODO: Check out the documentation of this ellipsoid package
+# FROM: https://systemanalysisdpt-cmc-msu.github.io/ellipsoids/doc/chap_ellcalc.html#basic-notions
+
 ### TODO: Implement `Polyhedra' as a base class, and let `Polytope'` inherits from it.
 ### TODO: Implement `Cones' (also for ETC), https://en.wikipedia.org/wiki/Convex_cone
     - Gabriel: Hmm might be tricky, as there's many definition; he used quadratic cones, of the form x^T Q x < 0
@@ -1351,6 +1354,7 @@ def pont_diff(poly_1: Polytope, poly_2: Polytope) -> Polytope:
         The Pontryagin difference of the two polytopes.
     
     """
+    ### FIXME: Also exist for ellipsoids, see https://systemanalysisdpt-cmc-msu.github.io/ellipsoids/doc/chap_ellcalc.html#basic-notions
     raise NotImplementedError
 
 
