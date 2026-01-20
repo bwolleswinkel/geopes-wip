@@ -1,6 +1,7 @@
 """This is a script to test implementation of initialization with and without automatic 'minimal' computation"""
 
 from __future__ import annotations
+import time
 import numpy as np
 from numpy.typing import NDArray
 import scipy as sp
@@ -19,6 +20,30 @@ class Polytope:
             else:
                 raise ValueError("Either 'verts' or 'n' must be provided")
         self.n = self.verts.shape[1] if verts is not None else n
+        self.A: NDArray | None = None
+        self.b: NDArray | None = None
+
+    @property
+    def A(self) -> NDArray:
+        if self._A is None:
+            time.sleep(3)  # Simulate expensive computation
+            self._A = ...
+        return self._A
+    
+    @A.setter
+    def A(self, value: NDArray | None) -> None:
+        self._A = value
+    
+    @property
+    def b(self) -> NDArray:
+        if self._b is None:
+            time.sleep(3)  # Simulate expensive computation
+            self._b = ...
+        return self._b
+    
+    @b.setter
+    def b(self, value: NDArray | None) -> None:
+        self._b = value
 
     @property
     def verts(self) -> NDArray:
@@ -79,3 +104,12 @@ if __name__ == "__main__":
 
     print("\nWith reduction (back to default):")
     print("Vertices:\n", poly_red_end.verts)
+
+    # NOTE: By Sam's request, we can also 'compute' both representations 'at initialization' time
+    poly_both = Polytope(verts)
+    print("Triggering both representations computation...")
+    poly_both.A, poly_both.b  # Trigger computation of H-representation
+
+    print("\nWith both representations computed (fast printing):")
+    print("Vertices:\n", poly_both.verts)
+    print(f"A: {poly_both.A}, b: {poly_both.b}")
