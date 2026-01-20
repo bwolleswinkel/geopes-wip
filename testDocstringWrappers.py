@@ -22,6 +22,7 @@ def eval_if_necessary(source: Any, globals: Globals, locals: Locals) -> Any:
     if not isinstance(source, str):
         return source
 
+    # FROM: GitHub Copilot Claude Sonnet 4 | 2026/01/20
     try:
         return eval(source, globals, locals)
     except NameError:
