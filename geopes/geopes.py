@@ -42,6 +42,9 @@
 
 ### TODO: Check out the Birkhoff polytope
 
+### TODO: Check out the 'condition number' for polytopes
+# FROM: https://www-sciencedirect-com.tudelft.idm.oclc.org/science/article/pii/016763779500019G
+
 ### TODO: Look into max and min outer volume ellipsoids, also called Löwner-John ellipsoids
 # FROM: https://en.wikipedia.org/wiki/John_ellipsoid
 
