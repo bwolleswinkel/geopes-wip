@@ -24,6 +24,10 @@
 
 ### TODO: Check out the documentation of this ellipsoid package
 # FROM: https://systemanalysisdpt-cmc-msu.github.io/ellipsoids/doc/chap_ellcalc.html#basic-notions
+-   Contains distance between ellipsoids (QCQP)
+-   Contains containment of ellipsoids (SDP)
+-   Contains minimum ellipsoid covering a polytope (SDP)
+-   Contains maximum ellipsoid inscribed in a polytope (SDP)
 
 ### TODO: Implement `Polyhedra' as a base class, and let `Polytope'` inherits from it.
 ### TODO: Implement `Cones' (also for ETC), https://en.wikipedia.org/wiki/Convex_cone
@@ -37,6 +41,9 @@
 ### TODO: Check out `Ellipsoidal Toolbox (ET)', https://www.mathworks.com/matlabcentral/fileexchange/21936-ellipsoidal-toolbox-et
 
 ### TODO: Check out the Birkhoff polytope
+
+### TODO: Look into max and min outer volume ellipsoids, also called Löwner-John ellipsoids
+# FROM: https://en.wikipedia.org/wiki/John_ellipsoid
 
 ### TODO: Gabriel: Check ellipsoidal containment with LMIs
 ### TODO: Allow for ellipsoids to be degenerate (also INFINITE measure, so ellipsoid), cite Ross's paper (check Gabriel STC)
