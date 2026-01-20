@@ -165,7 +165,7 @@ class Polytope():
 
     """
 
-    def __init__(self, *args: list[Never] | NDArray | tuple[NDArray, NDArray], n: int | None = None, rays: NDArray | None = None) -> None:
+    def __init__(self, *args: list[Never] | NDArray | tuple[NDArray, NDArray], n: int | None = None, A: NDArray | None = None, b: NDArray | None = None, A_eq: NDArray | None = None, b_eq: NDArray | None = None, verts: NDArray | None = None, rays: NDArray | None = None) -> None:
         """Initialize a Polytope either from vertices or half-spaces.
 
         Parameters
