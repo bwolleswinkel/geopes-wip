@@ -2062,18 +2062,16 @@ def ellps_from_lyap(A: ArrayLike, Q: ArrayLike) -> Ellipsoid:
     raise NotImplementedError
 
 
-def actuator_sat_reach(A: ArrayLike, B: ArrayLike, U: Polytope) -> Ellipsoid:
-    """Calculate an under-approximation of the maximal reachable set of a linear system with actuator saturation.
-    
-    References
-    ---------
-    [1] S.H. Kafash, J. Giraldo, C. Murguia, A.A. Cardenas, J. Ruths. (2018, June). "Constraining Attacker Capabilities Through Actuator Saturation," 2018 Annual American Control Conference (ACC), Milwaukee, USA, pp. 986-991
+# ------------ UTILS ------------
 
+
+def pre_img(A: ArrayLike) -> ArrayLike:
+    """Compute the pre-image of a matrix `A`. This is the inverse of the matrix if invertible, and the combination of the pseudo-inverse and the null-space if not.
+
+    ### FIXME: Maybe we should make this a function `inv_map(A, V)` instead?
+    
     """
     raise NotImplementedError
-
-
-# ------------ UTILS ------------
 
 
 def is_sym(A: ArrayLike) -> bool:
@@ -2293,6 +2291,17 @@ def max_output_nulling_subs(A: ArrayLike, B: ArrayLike, C: ArrayLike, D: ArrayLi
     raise NotImplementedError
 
 
+def actuator_sat_reach(A: ArrayLike, B: ArrayLike, U: Polytope) -> Ellipsoid:
+    """Calculate an under-approximation of the maximal reachable set of a linear system with actuator saturation.
+    
+    References
+    ---------
+    [1] S.H. Kafash, J. Giraldo, C. Murguia, A.A. Cardenas, J. Ruths. (2018, June). "Constraining Attacker Capabilities Through Actuator Saturation," 2018 Annual American Control Conference (ACC), Milwaukee, USA, pp. 986-991
+
+    """
+    raise NotImplementedError
+
+
 def partition(poly: Polytope) -> list[Polytope]:
     """Partition a polytope `poly` into smaller polytopes. This is useful for example in model predictive control (MPC) to create a finite set of polytopes that can be used to approximate the reachable set, or for explicit MPC. We might want to make the class `Partition` for this. 
 
@@ -2361,15 +2370,6 @@ def plot(obj: Polytope | Ellipsoid | Subspace, ax: plt.Axes = None) -> list[plt.
 
 def bisect(func: Callable, range: tuple, args: tuple) -> float:
     """Bisection algorithm to find the root of a function `func` in a given `range` with `args`"""
-    raise NotImplementedError
-
-
-def pre_img(A: ArrayLike) -> ArrayLike:
-    """Compute the pre-image of a matrix `A`. This is the inverse of the matrix if invertible, and the combination of the pseudo-inverse and the null-space if not.
-
-    ### FIXME: Maybe we should make this a function `inv_map(A, V)` instead?
-    
-    """
     raise NotImplementedError
 
 
