@@ -2104,6 +2104,11 @@ def is_sing(A: ArrayLike) -> bool:
     return np.linalg.cond(A) < (1 / np.finfo(A.dtype).eps)
 
 
+def is_square(A: ArrayLike) -> bool:
+    """Check if a matrix `A` is square, i.e., has the same number of rows and columns."""
+    return A.ndim == 2 and A.shape[0] == A.shape[1]
+
+
 def span(A: ArrayLike) -> ArrayLike:
     """Compute a basis spanned by the matrix `a` by removing linearly dependent columns"""
     # TODO: Check out the following discussion for more efficient methods
