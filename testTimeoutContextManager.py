@@ -18,14 +18,17 @@ class ComputationTimeoutError(TimeoutError):
 def raise_timeout(seconds: float | None):
 	"""Context manager that raises `ComputationTimeoutError` if the block exceeds `seconds`.
 
-	Usage:
-		with raise_timeout(2):
-			long_running_call()
+	Parameters
+	----------
+	seconds : float | None
+		Number of seconds before timing out. If `None` or non-positive, no timeout is set.
 
-	Notes:
-	- Uses Unix signals, so it only works in the main thread on POSIX systems.
+	Notes
+	-----
+	Uses Unix signals, so it only works in the main thread on POSIX systems.
 	
 	"""
+	# FIXME: Maybe remove the negative seconds is no timeout, seems a bit odd...
 	if seconds is None or seconds <= 0:
 		yield
 		return
@@ -50,18 +53,26 @@ def raise_timeout(seconds: float | None):
 if __name__ == '__main__':
 	print("Demo 1: should timeout")
 	try:
-		with raise_timeout(3):
+		with raise_timeout(5):
 			for _ in range(1_000_000_000):
 				pass
 		print("Completed (FAILURE: This should have timed out)")
 	except ComputationTimeoutError as e:
-		print("Caught timeout:", e)
+		print("Caught timeout (expected):", e)
 
 	print("Demo 2: should finish")
 	try:
-		with raise_timeout(3):
-			time.sleep(1)
+		with raise_timeout(5):
+			time.sleep(3)
 		print("Completed (expected)")
 	except ComputationTimeoutError as e:
-		print("Unexpected timeout:", e)
+		print("FAILURE:", e)
+
+	print("Demo 3: no timeout set")
+	try:
+		with raise_timeout(None):
+			time.sleep(6)
+		print("Completed (expected)")
+	except ComputationTimeoutError as e:
+		print("FAILURE:", e)
 
