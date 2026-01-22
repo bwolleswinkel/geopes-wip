@@ -55,10 +55,7 @@ def containment(ellps_1: Ellipsoid, ellps_2: Ellipsoid, EPS: float = 1E-6) -> bo
     problem = cvx.Problem(objective, cons_pos + cons_LMI)
     
     problem.solve()
-    if problem.status == cvx.OPTIMAL:
-        return True
-    else:
-        return False
+    return problem.status == cvx.OPTIMAL
 
 
 if __name__ == "__main__":
@@ -70,4 +67,6 @@ if __name__ == "__main__":
 
     containment_result = containment(ellps_1, ellps_2)
     print(f"Containment result: {containment_result}")
+
+    # NOTE: I also tried implementing the SDP with `scipy.optimize.minimize`, but this does not work, as the LMIs, i.e., the matrix inequalities requiting that a matrix is positive semidefinite, cannot be easily expressed in that framework. The only thing we can do is to set a constraint on the eigenvalues of the matrix, but this is not convex, non-smooth, and numerically unstable. As such, I concluded that a 'fallback' using `scipy.optimize.minimize` is not feasible for this problem.
 
