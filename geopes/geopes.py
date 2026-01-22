@@ -2134,6 +2134,11 @@ def atleast_2d_col(arr: ArrayLike) -> ArrayLike:
         return arr
     
 
+def rot_mat(angles: list[float]) -> ArrayLike:
+    """Compute the rotation matrix in ND given a list of angles"""
+    raise NotImplementedError
+    
+
 def weighted_norm(x: ArrayLike, W: ArrayLike) -> ArrayLike:
     """Compute the weighted norm of a vector `x` with weight matrix `W`, i.e., ‖x‖_W = sqrt(x^T W x)."""
     if not is_pos_def(W, allow_semidef=True):
