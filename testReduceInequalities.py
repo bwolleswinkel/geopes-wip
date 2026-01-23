@@ -79,6 +79,48 @@ def reduce(obj: Polytope | Subspace) -> Polytope | Subspace:
     return obj.reduce()
 
 
+# ====== TEST FUNCTION ====== 
+
+
+# QUESTION: Is this a good way to go about testing classes? Because we don't want to import the actual class, as we want to test the external function
+@dataclass
+class PolytopeAB:
+    A: NDArray
+    b: NDArray
+
+    def __post_init__(self) -> None:
+        self._Ab = np.column_stack((self.A, self.b))
+        self.m = self.b.size
+        self.is_hrepr = True
+
+    def reduce(*args, **kwargs) -> None:
+        Polytope.reduce(*args, **kwargs)
+
+
+def test_reduce() -> None:
+    """This is an example test function to test the `reduce` function"""
+    A = np.array([[-1,  0], 
+                  [ 0, -1], 
+                  [ 1,  1],
+                  [-1,  0],
+                  [ 0, -1]])
+    b = np.array([0, 0, 1, 1, 1])
+
+    poly_1 = PolytopeAB(A, b)
+    poly_1.reduce()
+    assert poly_1._Ab.shape[0] == 3, "Polytope reduction failed for redundant inequalities"
+    assert np.allclose(poly_1._Ab, np.array([[-1,  0, 0],
+                                             [ 0, -1, 0],
+                                             [ 1,  1, 1]])), "Polytope reduction produced incorrect result"
+    try:  # NOTE: This is an incorrect test, but serves as an example
+        assert isinstance(poly_1._Ab, str), "Here, as expected, an AssertionError should be raised (because the condition is false)"
+    except AssertionError as e:
+        print("Caught expected AssertionError:", e)
+
+
+# ====== TEST FUNCTION ====== 
+
+
 def main():
     A, b = np.array([[0, -1], [-1, 0], [1, 1]]), np.array([0, 0, 1])
     A_red, b_red = np.array([[0, -1], [-1, 0]]), np.array([1, 1])
@@ -106,6 +148,9 @@ def main():
     reduce(S)
     print("Subspace with redundant basis vectors:")
     print("Reduced basis:\n", S.basis)
+
+    # Check the test function
+    test_reduce()
 
 
 if __name__ == "__main__":
