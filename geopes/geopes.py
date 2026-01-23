@@ -2134,6 +2134,20 @@ def atleast_2d_col(arr: ArrayLike) -> ArrayLike:
         return arr
     
 
+def matrix_rank(A: ArrayLike) -> int:
+    """Compute the rank of a matrix `A`."""
+    if A.ndim != 2:
+        raise DimensionError(f"Input must be a matrix (2D array), got array with ndim={A.ndim}")
+    return np.linalg.matrix_rank(A)
+
+
+def null_space(A: ArrayLike) -> ArrayLike:
+    """Compute the null space of a matrix `A`."""
+    if A.ndim != 2:
+        raise DimensionError(f"Input must be a matrix (2D array), got array with ndim={A.ndim}")
+    return sp.linalg.null_space(A)
+    
+
 def rot_mat(angles: list[float]) -> ArrayLike:
     """Compute the rotation matrix in ND given a list of angles"""
     raise NotImplementedError

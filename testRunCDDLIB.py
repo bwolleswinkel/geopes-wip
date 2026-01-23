@@ -35,6 +35,21 @@ hpoly_2 = cdd.polyhedron_from_matrix(mat_poly_2)
 vmat_poly_2 = np.array(cdd.copy_generators(hpoly_2).array).astype(float)
 V_poly_2 = vmat_poly_2[:, 1:]  # Discard the first column which is all 1s for vertices
 
+# Generate half-space equations (redundant)
+A_poly_3 = np.array([[1, 0], 
+                     [0, 1], 
+                     [-1, -1],
+                     [1, 0],
+                     [0, 1]]).astype(float)
+b_poly_3 = np.array([0, 0, -1, -2, -2]).astype(float)
+
+# Compute the V-representation
+# FIXME: I think this -b is incorrect?
+mat_poly_3 = cdd.matrix_from_array(np.column_stack((-b_poly_3, A_poly_3)), rep_type=cdd.RepType.INEQUALITY)  # NOTE: Format for cddlib is [-b, a_1, ..., a_n] where the first column is always -b for inequalities
+hpoly_3 = cdd.polyhedron_from_matrix(mat_poly_3)
+vmat_poly_3 = np.array(cdd.copy_generators(hpoly_3).array).astype(float)
+V_poly_3 = vmat_poly_3[:, 1:]  # Discard the first column which is all 1s for vertices
+
 # ------ PRINT ------
 
 print("---- POLY 1 ----\n")
@@ -54,6 +69,15 @@ print("b:")
 print(b_poly_2)
 print("\nPoints (V-representation):")
 print(V_poly_2)
+
+print("\n---- POLY 3 ----\n")
+print("Inequalities (H-representation):")
+print("A:")
+print(A_poly_3)
+print("b:")
+print(b_poly_3)
+print("\nPoints (V-representation):")
+print(V_poly_3)
 
 # ------ PLOTTING ------
 
@@ -85,6 +109,19 @@ ax_poly_2.set_title('Polyhedron from H-representation')
 ax_poly_2.set_xlabel(r"$x_{1}$")
 ax_poly_2.set_ylabel(r"$x_{2}$")
 ax_poly_2.legend(loc='upper left')
+
+# Plot the points from the H-representation
+fig_poly_3, ax_poly_3 = plt.subplots()
+for idx in range(A_poly_3.shape[0]):
+    if not np.isclose(A_poly_3[idx, 1], 0):
+        ax_poly_3.plot(X, (b_poly_3[idx] - A_poly_3[idx, 0] * X) / A_poly_3[idx, 1], 'b--', label="Given (H-representation)" if idx == 0 else "")
+    else:
+        ax_poly_3.axvline(x=b_poly_3[idx] / A_poly_3[idx, 0], color='b', linestyle='--', label="Given (H-representation)" if idx == 0 else "")
+ax_poly_3.plot(V_poly_3[:, 0], V_poly_3[:, 1], 'ro', label="Calculated (V-representation)")
+ax_poly_3.set_title('Polyhedron from H-representation')
+ax_poly_3.set_xlabel(r"$x_{1}$")
+ax_poly_3.set_ylabel(r"$x_{2}$")
+ax_poly_3.legend(loc='upper left')
 
 # Show the plots
 plt.show()
