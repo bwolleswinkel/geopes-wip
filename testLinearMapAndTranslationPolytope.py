@@ -102,6 +102,22 @@ class Polytope:
         else:
             raise ValueError("The translation could not be applied to the polytope in either representation")
         
+    def normalize(self, in_place: bool = True) -> Polytope:
+        """Normalize the Ab-representation such that b ∈ {-1, 0, 1}^m"""
+        if self.is_hrepr:
+            divisor = np.array([np.abs(elem) if not np.isclose(elem, 0) else 1 for elem in self._Ab[:, -1]])[:, np.newaxis]
+            Ab_new = self._Ab / divisor
+            # FIXME: This is kind of arbitrary, but... might be nice for quick visual comparison
+            Ab_new = Ab_new[np.argsort(Ab_new[:, -1])]
+            # TODO: We can also take this one step further, and sort the entries of A in increasng order (so row [0, 0, 1] comes before [2, -3, 0], and [2, 3, 0] after that one. etc.)
+            if in_place:
+                self._Ab = Ab_new
+            else:
+                return Polytope(Ab_new[:, :-1], Ab_new[:, -1])
+        else: 
+            if not in_place:
+                return Polytope(verts=self.verts)
+        
 
 def is_singular(A: NDArray) -> bool:
     """Check if a matrix `A` is singular, i.e., det(A) = 0"""
@@ -183,6 +199,19 @@ def main() -> None:
 
     print(f"Translated Cube Facets (A, b):\n{poly_cube_hrepr_translated.A}, {poly_cube_hrepr_translated.b}")
     print(f"Translated Cube Vertices from H-repr:\n{poly_cube_hrepr_translated.verts}")
+
+    # Normalize the two for comparison
+    poly_cube_verts_translated.normalize()
+    poly_cube_hrepr_translated.normalize()
+
+    print(f"Normalized Translated Cube Facets from V-repr:\n{poly_cube_verts_translated.A}, {poly_cube_verts_translated.b}")
+    print(f"Normalized Translated Cube Facets (A, b):\n{poly_cube_hrepr_translated.A}, {poly_cube_hrepr_translated.b}")
+
+    A_zeros, b_zeros = np.array([[1, 1], [0, 1], [-1, 0], [2, 1], [6, 0]]), np.array([0, -1, 0, 5, -2])
+    poly_zeros = Polytope(A_zeros, b_zeros)
+    print(f"Before normalization:\n{poly_zeros.A}, {poly_zeros.b}")
+    poly_zeros.normalize()
+    print(f"After normalization:\n{poly_zeros.A}, {poly_zeros.b}")
 
 
 if __name__ == "__main__":
