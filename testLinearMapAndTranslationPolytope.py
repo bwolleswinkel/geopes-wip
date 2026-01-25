@@ -104,12 +104,13 @@ class Polytope:
         
     def normalize(self, in_place: bool = True) -> Polytope:
         """Normalize the Ab-representation such that b ∈ {-1, 0, 1}^m"""
+        # NOTE: I think this is actaully different from normalizing the rows of A to unit length? As described in https://people.ee.ethz.ch/~mpt/2/docs/refguide/mpt/@polytope/normalize.html? But why would we want that?
         if self.is_hrepr:
             divisor = np.array([np.abs(elem) if not np.isclose(elem, 0) else 1 for elem in self._Ab[:, -1]])[:, np.newaxis]
             Ab_new = self._Ab / divisor
             # FIXME: This is kind of arbitrary, but... might be nice for quick visual comparison
             Ab_new = Ab_new[np.argsort(Ab_new[:, -1])]
-            # TODO: We can also take this one step further, and sort the entries of A in increasng order (so row [0, 0, 1] comes before [2, -3, 0], and [2, 3, 0] after that one. etc.)
+            # TODO: We can also take this one step further, and sort the entries of A in increasing order (so row [0, 0, 1] comes before [2, -3, 0], and [2, 3, 0] after that one. etc.)
             if in_place:
                 self._Ab = Ab_new
             else:
