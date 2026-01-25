@@ -2101,6 +2101,9 @@ def is_sing(A: ArrayLike) -> bool:
     """Check if a matrix `A` is singular, i.e., det(A) = 0."""
     # FROM: https://stackoverflow.com/questions/13249108/efficient-pythonic-check-for-singular-matrix
     # FIXME: Replace `eps` with the tolerance cfg.ATOL? Actually, probably not, right?
+    # FIXME: Should we call this `is_invertible` instead? Or `is_nonsingular`?
+    # FIXME: This raise the value error "ValueError: data type <class 'numpy.int64'> not inexact" if A is of integer type!!!
+    # FIXME: Actually, this doesn't seem to work at all??
     return np.linalg.cond(A) < (1 / np.finfo(A.dtype).eps)
 
 
