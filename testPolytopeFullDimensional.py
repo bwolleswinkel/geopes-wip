@@ -87,14 +87,13 @@ class Polytope:
                 # FROM: GitHub Copilot GPT-4.1 | 2026/01/28 [untested/unverified]
                 self._is_full_dim = np.linalg.matrix_rank(self.verts - np.mean(self.verts, axis=1, keepdims=True)) == self.n
             elif self.is_hrepr:
-                self._is_full_dim = ~np.isclose(self.chebr, 0.0)
+                self._is_full_dim = not np.isclose(self.chebr, 0)
             else:
                 raise ValueError("Polytope must have either H-representation or V-representation to determine full-dimensionality")
             if not self._is_full_dim:
                 if self._chebcr is not None:
                     self._chebcr[-1] = 0
-                if self._vol is not None:
-                    self._vol = 0
+                self._vol = 0
         return self._is_full_dim
 
     def _comp_chebcr(self) -> NDArray:
