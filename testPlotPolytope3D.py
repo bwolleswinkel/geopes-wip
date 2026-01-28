@@ -76,6 +76,7 @@ class Polytope:
             fig, ax = None, ax
         if color is None:
             color = ax._get_lines.get_next_color()
+        # TODO: Also implement the logic when `self` is lower-dimensional, so when it is a single plane, or a line.
         for idx in range(self.m):
             # TODO: Replace this with the facers-vertices incidence matrix when available
             verts_facet = self.verts[:, np.isclose(self.A[idx, :] @ self.verts, self.b[idx])]
@@ -102,7 +103,6 @@ def _plot_facet_3d(points: NDArray, ax: Axes, color: str, alpha: float, plot_edg
     # Use signed_angle to sort points around centroid
     points = sorted(points, key=lambda p: signed_angle(points[0] - centroid, p - centroid, look=look))
     ax.add_collection3d(Poly3DCollection([np.array(points)], facecolor=mpl.colors.to_rgba(color, alpha=alpha), edgecolor=mpl.colors.to_rgba(color, alpha=1) if plot_edges else None))
-
 
 
 def signed_angle(v_1: NDArray, v_2: NDArray, look: NDArray | None = None) -> float:
