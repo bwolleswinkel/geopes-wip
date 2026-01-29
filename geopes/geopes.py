@@ -2126,7 +2126,7 @@ def span(A: ArrayLike) -> ArrayLike:
     return np.column_stack(basis)
 
 
-def atleast_2d_col(arr: ArrayLike) -> ArrayLike:
+def atleast_2d_col[T](arr: ArrayLike[T]) -> ArrayLike[T]:
     """Convert scalars/1D arrays to column vectors, and leave ND arrays (where N >= 2) unchanged"""
     arr = np.asarray(arr)
     if arr.ndim < 1:
