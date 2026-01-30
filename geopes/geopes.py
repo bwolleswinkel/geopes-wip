@@ -81,6 +81,9 @@
 ### TODO: Check out the software package 'polymake'
 # FROM: https://polymake.org/doku.php/start
 
+### TODO: Check out the package 'shapely'
+# FROM: https://pypi.org/project/shapely/
+
 ### TODO: Check out the Julia library "Polyhedra"
 # FROM: https://juliapolyhedra.github.io/Polyhedra.jl/stable/generated/Minimal%20Robust%20Positively%20Invariant%20Set/  # nopep 8
 # FROM: https://www.youtube.com/watch?v=YuxJtvgg6uc  # nopep8
