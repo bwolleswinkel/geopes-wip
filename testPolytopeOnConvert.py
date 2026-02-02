@@ -4,8 +4,9 @@ from typing import Never, Literal
 
 import numpy as np
 from numpy.typing import NDArray
+import scipy as sp
 
-from testPolytopeOnConvertConfig import CFG as cfg
+from testPolytopeOnConvertConfig import CFG, set_on_poly_convert, on_poly_convert
 from testRunPyCDDLIBDegenerate import enum_verts, enum_facets
 
 
@@ -33,21 +34,30 @@ class Polytope:
         
     @property
     def verts(self) -> NDArray:
-        if not self.is_vrepr and cfg.on_convert(poly=self):
+        if not self.is_vrepr and CFG.on_poly_convert(poly=self):
             self._verts, _ = enum_verts(np.column_stack((self.A, self.b)))
             self.is_vrepr = True
         return self._verts
     
+    @verts.setter
+    def verts(self, value: NDArray) -> None:
+        if CFG.on_poly_assign == 'reduce':
+            value = conv(value)
+        self._verts = value
+        self.is_vrepr = True
+        self._Ab = None
+        self.is_hrepr = False
+    
     @property
     def A(self) -> NDArray:
-        if not self.is_hrepr and cfg.on_convert(poly=self):
+        if not self.is_hrepr and CFG.on_poly_convert(poly=self):
             self._Ab = enum_facets(self.verts)
             self.is_hrepr = True
         return self._Ab[:, :-1]
     
     @property
     def b(self) -> NDArray:
-        if not self.is_hrepr and cfg.on_convert(poly=self):
+        if not self.is_hrepr and CFG.on_poly_convert(poly=self):
             self._Ab = enum_facets(self.verts)
             self.is_hrepr = True
         return self._Ab[:, -1]
@@ -72,17 +82,32 @@ class Polytope:
     def __repr__(self) -> str:
         repr_str = f"Polytope(n={self.n}, is_vrepr={self.is_vrepr}, is_hrepr={self.is_hrepr}, _verts_shape={self._verts.shape if self._verts is not None else None}, _Ab_shape={self._Ab.shape if self._Ab is not None else None})"
         return repr_str
-    
 
-def set_on_poly_convert(mode: Literal['allow', 'warning', 'error']) -> None:
-    """Set the behavior when converting between polytope representations"""
-    cfg.set_on_poly_convert(mode)
+
+def conv(verts: NDArray) -> NDArray:
+    """Compute the convex hull of a set of points given by `verts`"""
+    # FROM: GitHub Copilot GPT-4.1 | 2026/01/28 [untested/unverified]
+    centered = verts - np.mean(verts, axis=1, keepdims=True)
+    U, S, _ = np.linalg.svd(centered, full_matrices=False)
+    rank = np.sum(S > 1E-12)
+    if rank == 0:
+        return verts[:, [0]]
+    coords = U[:, :rank].T @ centered 
+    if rank == 1:
+        idx_min, idx_max = np.argmin(coords[0]), np.argmax(coords[0])
+        return verts[:, np.unique([idx_min, idx_max])]
+    hull = sp.spatial.ConvexHull(coords.T)
+    return verts[:, hull.vertices]
     
 
 def main():
 
     def inner_scope(poly: Polytope):
         _ = np.eye(3) @ poly
+
+    def second_inner_scope(poly: Polytope):
+        with on_poly_convert('warning'):
+            poly.verts = np.ones((3, 5))
 
     phi = (1 + np.sqrt(5)) / 2  # Golden ratio
     verts_dodecahedron = np.array([[1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1], [-1, 1, 1], [-1, 1, -1], [-1, -1, 1], [-1, -1, -1],
@@ -106,7 +131,6 @@ def main():
                                [0, 0, 1], 
                                [0, 0, -1]]), np.array([1, 1, 1, 1, 1, 1])
     
-    global cfg
     set_on_poly_convert('error')
     
     poly_cube_Ab = Polytope(A_cube, b_cube)
@@ -114,6 +138,15 @@ def main():
     try:
         print("Attempting to access V-representation (should raise warning), from inner scope...")
         inner_scope(poly_cube_Ab)
+    except RuntimeError as _:
+        print(f"Caught expected error: {_}")
+
+    with on_poly_convert('warning'):
+        inner_scope(poly_cube_Ab)
+        print(f"No errors raised within 'warning' context manager.")
+
+    try:
+        second_inner_scope(poly_cube_Ab)
     except RuntimeError as _:
         print(f"Caught expected error: {_}")
 
