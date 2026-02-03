@@ -1,12 +1,16 @@
-"""Script to test using typing protocols to add shape information to numpy arrays"""
+"""Script to test typing for Numpy Arrays using protocols with sentinel values for shape dimensions"""
 
 # FROM: GitHub Copilot, Claude Haiku 4.5 | 2026/02/03
-from __future__ import annotations
-from typing import Protocol, Any, runtime_checkable, TypeVar, Generic, TypeVarTuple
+from typing import Protocol, Any, runtime_checkable, TypeVar, Generic, TypeVarTuple, Literal, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray as NumpyNDArray
 
+
+# Sentinel values for shape dimension names - use TypeAlias to make them valid types
+N: TypeAlias = Literal['n']
+M: TypeAlias = Literal['m']
+K: TypeAlias = Literal['k']
 
 # TypeVarTuple for Shape - allows variable number of dimensions
 ShapeDims = TypeVarTuple('ShapeDims')
@@ -74,10 +78,17 @@ def main() -> None:
     d: NDArray[Any, float] = np.array([1.0, 2.0, 3.0])
     
     # Test with both Shape and dtype - 2D
-    e: NDArray[Shape['n', 'm'], float] = np.zeros((3, 4))
+    e: NDArray[Shape[N, N], float] = np.zeros((4, 4))
     
     # Test with variable length shape
-    f: NDArray[Shape['n', ...], int | bool] = np.array([1, 2, 3])
+    f: NDArray[Shape[N], int | bool] = np.array([1, 2, 3])
+
+    # NOTE: If we use a direct tuple, we can also use `...` in the type hint
+    X: NDArray[tuple[Any, ...], float] = np.zeros((2, 3, 4, 5))
+
+    Y: NDArray[tuple[N, Any], float] = np.zeros((2, 3, 4, 5))
+
+    g: NDArray[Shape[N, M, K], float] = 6  #  NOTE: This should raise a type checker error
 
     print(a, a.shape, a.size, a.dtype)
     print(c, c.shape, c.size, c.dtype)
