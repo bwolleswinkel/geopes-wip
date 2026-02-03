@@ -1,11 +1,17 @@
 """Script to test using typing protocols to add shape information to numpy arrays"""
 
 from __future__ import annotations
-from typing import Protocol, Any, runtime_checkable, TypeVar, Generic, TypeVarTuple
+from typing import Protocol, Any, runtime_checkable, TypeVar, Generic, TypeVarTuple, Literal
 
 import numpy as np
 from numpy.typing import NDArray as NumpyNDArray
 
+
+# Sentinel values for shape dimension names - makes them valid identifiers for subscripting
+n = Literal['n']
+m = Literal['m']
+k = Literal['k']
+ellipsis_ = type(...)  # Type of the ellipsis object
 
 # TypeVarTuple for Shape - allows variable number of dimensions
 ShapeDims = TypeVarTuple('ShapeDims')
@@ -14,7 +20,7 @@ ShapeDims = TypeVarTuple('ShapeDims')
 class Shape(Generic[*ShapeDims]):
     """Generic type alias for shape information, used for documentation only.
     
-    Accepts string literals ('n', 'm', 'k') and ellipsis via subscripting.
+    Accepts dimension literals ('n', 'm', 'k') and ellipsis via subscripting.
     
     Usage:
         Shape['n', 'm']  - 2D shape with dimensions n and m
@@ -67,16 +73,18 @@ def main():
     b: NumpyNDArray = np.zeros((3, 2))
 
     # Test with Shape annotation - single dimension
-    c: NDArray[Shape['n'], float] = np.array([1, 2, 3])
+    c: NDArray[Shape[n], float] = np.array([1, 2, 3])
     
     # Test with dtype annotation
     d: NDArray[Any, float] = np.array([1.0, 2.0, 3.0])
     
     # Test with both Shape and dtype - 2D
-    e: NDArray[Shape['n', 'm'], float] = np.zeros((3, 4))
+    e: NDArray[Shape[n, m], float] = np.zeros((3, 4))
     
     # Test with variable length shape
-    f: NDArray[Shape['n', ...], int | bool] = np.array([1, 2, 3])
+    f: NDArray[Shape[n, ...], int | bool] = np.array([1, 2, 3])
+
+    g: NDArray[float] = 7
 
     print(a, a.shape, a.size, a.dtype)
     print(c, c.shape, c.size, c.dtype)
