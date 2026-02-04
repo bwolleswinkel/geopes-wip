@@ -94,6 +94,10 @@ class Ellipsoid:
     
     def __hash__(self) -> int:
         if self.is_degen:
+            # FIXME: Instead of raising a NotImplementedError, we could also generate a random hash for degenerate ellipsoids, but that would mean that two equal degenerate ellipsoids would not have the same hash; this might be acceptable if we only use the hash for caching purposes.
+            '''
+            return hash((np.random.randint(0, 2 ** 32),))
+            '''
             raise NotImplementedError("Currently, hashing degenerate ellipsoids is not supported")
         return hash((self._sort_and_round(self.c).tobytes(), self._sort_and_round(self.Q).tobytes()))
     
