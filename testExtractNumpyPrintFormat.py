@@ -21,7 +21,7 @@ float_rows, float_cols = 5, 100
 n = 5
 
 # Set the maximum number of vertices to print
-max_nverts = 6
+max_nverts = 4
 
 # ------ METHOD ------
 

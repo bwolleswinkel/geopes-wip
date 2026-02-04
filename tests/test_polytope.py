@@ -63,7 +63,7 @@ import pytest
 
 import geopes as gp
 
-@pytest.mark.parametrize("input, expected", [
+@pytest.mark.parametrize('input, expected', [
     ((np.array([[1, 0], [0, 1], [-1, 0], [0, -1]]), np.array([1, 1, 1, 1])), ((np.array([[1, 0], [0, 1], [-1, 0], [0, -1]]), np.array([1, 1, 1, 1])), 2, False, 2))  # A.shape = (4, 2), b.shape = (4,)
 ])
 
