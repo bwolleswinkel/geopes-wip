@@ -1,6 +1,7 @@
 """Contains several archetype examples of polytopes for testing purposes"""
 
 from dataclasses import dataclass
+from typing import Optional
 
 import numpy as np
 
@@ -9,21 +10,20 @@ import numpy as np
 class PolytopeData:
     name: str
     n: int
-    A: np.ndarray | None = None
-    b: np.ndarray | None = None
-    verts: np.ndarray | None = None
-    m: int | None = None
-    k: int | None = None
-    A_eq: np.ndarray | None = None
-    b_eq: np.ndarray | None = None
-    rays: np.ndarray | None = None
-    # QUESTION: Should we actually set these flags in the data? Or should we infer them when needed?
-    is_degen: bool | None = None
-    is_bounded: bool | None = None
-    is_full_dim: bool | None = None
-    is_singleton: bool | None = None
-    is_empty: bool | None = None
-    is_minimal: bool | None = None
+    is_degen: bool
+    is_bounded: bool
+    is_full_dim: bool
+    is_singleton: bool
+    is_empty: bool
+    is_minimal: bool
+    A: Optional[np.ndarray] = None
+    b: Optional[np.ndarray] = None
+    verts: Optional[np.ndarray] = None
+    m: Optional[int] = None
+    k: Optional[int] = None
+    A_eq: Optional[np.ndarray] = None
+    b_eq: Optional[np.ndarray] = None
+    rays: Optional[np.ndarray] = None
 
     def __post_init__(self):
         if self.A.shape[0] != self.m:
