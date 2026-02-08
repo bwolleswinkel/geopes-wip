@@ -1,0 +1,1 @@
+"""Script to test detecting whether a polytope is pointed"""
