@@ -1,6 +1,6 @@
 """Script to test calculating volume of a polytope"""
 
-from typing import Any, Callable, Literal, Never
+from typing import Never
 
 import numpy as np
 from numpy.typing import NDArray
