@@ -16,24 +16,24 @@ class Polytope:
         if len(args) == 0:
             if 'n' in kwargs:
                 self.n = kwargs['n']
-                self._verts, self._Ab = None, None
-                self._rays = None
+                self._verts, self._Ab = np.empty((0, self.n)), np.empty((0, self.n + 1))
+                self._rays, self._Ab_eq = None, None
                 self.is_vrepr, self.is_hrepr = False, False
             elif 'verts' in kwargs and 'A' in kwargs and 'b' in kwargs:
                 self._verts, self._Ab = kwargs['verts'], np.column_stack((kwargs['A'], kwargs['b']))
-                self._rays = None
+                self._rays, self._Ab_eq = None, None
                 self.is_vrepr, self.is_hrepr = True, True
                 self.n = self._verts.shape[1]
             else:
                 raise ValueError("Polytope must be initialized with either vertices, (A, b) representation, or dimension n.")
         elif len(args) == 1:
             self._verts, self._Ab = args[0], None
-            self._rays = None
+            self._rays, self._Ab_eq = None, None
             self.is_vrepr, self.is_hrepr = True, False
             self.n = self._verts.shape[1]
         elif len(args) == 2:
             self._verts, self._Ab = None, np.column_stack(args)
-            self._rays = None
+            self._rays, self._Ab_eq = None, None
             self.is_vrepr, self.is_hrepr = False, True
             self.n = self._Ab.shape[1] - 1
         else:
@@ -56,16 +56,23 @@ class Polytope:
     @property
     def A(self) -> NDArray:
         if not self.is_hrepr:
-            self._Ab, self.Ab_eq = enum_facets(self.verts)
+            self._Ab, self._Ab_eq = enum_facets(self.verts)
             self.is_hrepr = True
         return self._Ab[:, :-1]
     
     @property
     def b(self) -> NDArray:
         if not self.is_hrepr:
-            self._Ab, self.Ab_eq = enum_facets(self.verts)
+            self._Ab, self._Ab_eq = enum_facets(self.verts)
             self.is_hrepr = True
         return self._Ab[:, -1]
+    
+    @property
+    def Ab_eq(self) -> NDArray:
+        if not self.is_hrepr or self._Ab_eq is None:
+            self._Ab, self._Ab_eq = enum_facets(self.verts)
+            self.is_hrepr = True
+        return self._Ab_eq
     
     @property
     def m(self) -> int:
@@ -92,7 +99,7 @@ class Polytope:
     @property
     def is_pointed(self) -> bool:
         if self.is_hrepr:
-            return np.linalg.matrix_rank(self.A) == self.n
+            return np.linalg.matrix_rank(np.vstack((self.A, self.Ab_eq[:, :-1]))) == self.n
         elif self.is_vrepr:
             if self.rays.shape[0] == 0:
                 return True
@@ -131,7 +138,7 @@ def main():
     A_eq_line, b_eq_line = np.array([[1, 0]]), np.array([1])  # Line x_1 = 1 in 2D space (unbounded in both directions)
 
     poly_line = Polytope(n=2)
-    poly_line._Ab = np.column_stack((A_eq_line, b_eq_line))
+    poly_line._Ab_eq = np.column_stack((A_eq_line, b_eq_line))
     poly_line.is_hrepr = True
     print(f"Line is pointed (H-repr): {poly_line.is_pointed}")
     _ = poly_line.verts  # Force V-repr computation
