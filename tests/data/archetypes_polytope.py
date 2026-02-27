@@ -40,8 +40,8 @@ class PolytopeData:
 # 1D ARCHETYPES (nondegenerate, non-redundant)
 # ============================================
 
-UNIT_LINE_SEGMENT = PolytopeData(
-    name="unit_line_segment",
+UNIT_LINE_SEGMENT_1D = PolytopeData(
+    name="unit_line_segment_1d",
     n=1,
     A=np.array([[1], [-1]]),
     b=np.array([1, 0]),
@@ -56,8 +56,8 @@ UNIT_LINE_SEGMENT = PolytopeData(
     is_minimal=True,
 )
 
-OFFSET_LINE_SEGMENT = PolytopeData(
-    name="offset_line_segment",
+OFFSET_LINE_SEGMENT_1D = PolytopeData(
+    name="offset_line_segment_1d",
     n=1,
     A=np.array([[1], [-1]]),
     b=np.array([2, 1]),
@@ -72,8 +72,8 @@ OFFSET_LINE_SEGMENT = PolytopeData(
     is_minimal=True,
 )
 
-SCALED_LINE_SEGMENT = PolytopeData(
-    name="scaled_line_segment",
+SCALED_LINE_SEGMENT_1D = PolytopeData(
+    name="scaled_line_segment_1d",
     n=1,
     A=np.array([[1], [-1]]),
     b=np.array([2, 0]),
@@ -92,8 +92,8 @@ SCALED_LINE_SEGMENT = PolytopeData(
 # 2D ARCHETYPES
 # =============
 
-UNIT_SQUARE = PolytopeData(
-    name="unit_square",
+UNIT_SQUARE_2D = PolytopeData(
+    name="unit_square_2d",
     n=2,
     A=np.array([[1, 0], [0, 1], [-1, 0], [0, -1]]),
     b=np.array([1, 1, 0, 0]),
