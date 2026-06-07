@@ -1,0 +1,158 @@
+"""Implementation with approx where we can call `arr = approx(expected, sort_rows=True, canon=True)` to get an object that will compare approximately equal to `expected` with the specified preprocessing applied to both sides of the comparison."""
+
+from typing import TYPE_CHECKING
+from functools import wraps
+
+import numpy as np
+import pytest
+
+from tests.conftest import ATOL, RTOL
+
+if TYPE_CHECKING:
+    from typing import Optional
+
+    from numpy.typing import NDArray
+
+
+class ApproxArray:
+    """Approximate comparison for arrays with preprocessing (sorting, normalization)."""
+    
+    __array_ufunc__ = None
+
+    def __init__(self, expected, rtol=None, atol=None, sort_rows=True, canon=False, eq=True, **kwargs):
+        self.expected = expected
+        self.sort_rows = sort_rows
+        self.canon = canon
+        self.eq = eq
+        
+        # Set up pytest.approx kwargs
+        self.approx_kwargs = kwargs.copy()
+        self.approx_kwargs.setdefault('rel', RTOL if rtol is None else rtol)
+        self.approx_kwargs.setdefault('abs', ATOL if atol is None else atol)
+        
+    def __eq__(self, actual):
+        """Compare arrays with preprocessing applied to both sides."""
+        # Apply preprocessing to both expected and actual
+        processed_expected = self._preprocess(self.expected)
+        processed_actual = self._preprocess(actual)
+        
+        # Use pytest.approx for the final comparison
+        try:
+            comparison_result = processed_actual == pytest.approx(processed_expected, **self.approx_kwargs)
+            # Handle array comparisons - pytest.approx returns an array of booleans for arrays
+            if isinstance(comparison_result, np.ndarray):
+                return comparison_result.all()
+            return comparison_result
+        except (TypeError, ValueError):
+            # Fallback for edge cases
+            return False
+        
+    def _preprocess(self, arr):
+        """Apply requested preprocessing transformations."""
+        if not isinstance(arr, np.ndarray):
+            return arr
+            
+        result = arr.copy()
+        
+        # Apply normalization if requested
+        if self.canon:
+            result = normalize(result, eq=self.eq)
+            
+        # Apply row sorting if requested
+        if self.sort_rows and result.ndim == 2:
+            result = sort_rows(result)
+            
+        return result
+
+
+@wraps(pytest.approx)
+def approx(*args, rtol: Optional[float] = None, atol: Optional[float] = None, sort_rows: bool = False, canon: bool = False, eq: bool = True, **kwargs):
+    """Wrapper function of `pytest.approx` with sensible defaults and array preprocessing.
+    
+    Parameters
+    ----------
+    *args : positional arguments
+        Passed to pytest.approx or ApproxArray
+    rtol : float, optional
+        Relative tolerance
+    atol : float, optional  
+        Absolute tolerance
+    sort_rows : bool, default=False
+        If True, sort rows of 2D arrays lexicographically before comparison
+    canon : bool, default=False
+        If True, apply canonical normalization to constraint matrices
+    eq : bool, default=True
+        If True and canon=True, apply equality constraint normalization
+    **kwargs
+        Additional arguments passed to pytest.approx
+        
+    Returns
+    -------
+    ApproxArray or pytest.approx
+        Comparison object with preprocessing applied
+    """
+    if len(args) == 1 and isinstance(args[0], np.ndarray) and (sort_rows or canon):
+        return ApproxArray(args[0], rtol=rtol, atol=atol, sort_rows=sort_rows, canon=canon, eq=eq, **kwargs)
+    else:
+        kwargs.setdefault('rel', RTOL if rtol is None else rtol)
+        kwargs.setdefault('abs', ATOL if atol is None else atol)
+        return pytest.approx(*args, **kwargs)
+
+
+@wraps(np.lexsort)
+def sort_rows(arr: NDArray) -> NDArray:
+    """Sort the rows of a 2D array in lexicographical order"""
+    return arr[np.lexsort(arr.T[::-1])]
+
+
+@wraps(np.rad2deg)
+def rad2deg(arr: NDArray) -> NDArray:
+    """Convert radians to degrees"""
+    return np.rad2deg(arr)
+
+
+@wraps(np.deg2rad)
+def deg2rad(arr: NDArray) -> NDArray:
+    """Convert degrees to radians"""
+    return np.deg2rad(arr)
+
+
+def normalize(Ab: NDArray, eq: bool = False) -> NDArray:
+    """Normalize constraint matrix rows by coefficient vector norm.
+    
+    Each row of [A, b] represents the constraint `A @ x <= b` (inequality)
+    or `A @ x = b` (equality). Normalizes by ||A|| to make constraints 
+    comparable up to positive scaling.
+    
+    For equality constraints, applies canonical sign normalization to handle
+    the fact that `A @ x = b` and `(-A) @ x = (-b)` are equivalent.
+    
+    Parameters
+    ----------
+    Ab : NDArray
+        Constraint matrix [A, b]
+    eq : bool, default=False
+        If True, applies canonical sign normalization for equality constraints
+        
+    Returns
+    -------
+    NDArray
+        Normalized constraint matrix
+    """
+    if Ab.size == 0:
+        return Ab
+    normalized = Ab.copy().astype(float)
+    for idx in range(Ab.shape[0]):
+        coeffs = Ab[idx, :-1]
+        norm_coeffs = np.linalg.norm(coeffs)
+        if not np.isclose(norm_coeffs, 0):
+            normalized[idx] = Ab[idx] / norm_coeffs
+            if eq:
+                first_nonzero_idx = np.where(~np.isclose(normalized[idx, :-1], 0))[0]
+                if len(first_nonzero_idx) > 0:
+                    first_nonzero = normalized[idx, first_nonzero_idx[0]]
+                    if first_nonzero < 0:
+                        normalized[idx] *= -1
+        else:
+            normalized[idx] = Ab[idx]
+    return normalized

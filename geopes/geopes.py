@@ -819,6 +819,28 @@ class Polytope(ConvexRegion):
     def schlegel(self):
         """Compute a Schlegel diagram of the polytope, if possible"""
         raise NotImplementedError
+    
+
+def poly():
+    ...
+
+def poly_from_verts():
+    ...
+
+def poly_from_ineq():
+    ...
+
+def poly_from_bounds():
+    ...
+
+def poly_empty():
+    ...
+
+def poly_from_norm():
+    ...
+
+def poly_from_point():
+    ...
 
 
 class Zonotope(Polytope):

@@ -1,33 +1,30 @@
-"""Script to test using typing protocols to add shape information to numpy arrays"""
+"""Script to test typing for Numpy Arrays using protocols with sentinel values for shape dimensions"""
 
 # FROM: GitHub Copilot, Claude Haiku 4.5 | 2026/02/03
-from typing import Protocol, Any, runtime_checkable, TypeVar, Generic, TypeVarTuple, Literal
+from typing import Protocol, Any, runtime_checkable, TypeVar, Generic, TypeVarTuple, Literal, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray as NumpyNDArray
 
 
+# Sentinel values for shape dimension names - use TypeAlias to make them valid types
+N: TypeAlias = Literal['n']
+M: TypeAlias = Literal['m']
+K: TypeAlias = Literal['k']
+
 # TypeVarTuple for Shape - allows variable number of dimensions
 ShapeDims = TypeVarTuple('ShapeDims')
 
-# Type aliases for common dimension literals
-N = Literal["n"]
-M = Literal["m"]
 
-
-class Shape(Generic[*ShapeDims]):
+class Shape(Generic[*ShapeDims]):  # type: ignore[misc]
     """Generic type alias for shape information, used for documentation only.
     
-    Accepts dimension literals (e.g., `"n"`, `"m"`, `"k"`), ellipsis (`...`), and generics (`Any`) via subscripting.
+    Accepts dimension literals ('n', 'm', 'k') and ellipsis via subscripting.
     
-    Examples
-    --------
-    >>> Shape[...]  # Array of any shape
-    >>> Shape["n"]  # 1D array of length n
-    >>> Shape["m", Any, ...]  # Array with at least two dimensions and m rows
+    Usage:
+        Shape['n', 'm']  - 2D shape with dimensions n and m
+        Shape['n', ...]  - variable length shape starting with n
     
-    Notes
-    -----
     This is purely for type hints and doesn't enforce anything at runtime.
     """
     pass
@@ -43,29 +40,29 @@ class NDArray(Protocol[ShapeOrDType_co, DType_co]):
     """Protocol for numpy-like arrays with shape, size, and dtype attributes.
 
     Type parameters are for documentation only:
-        - First parameter: Shape information (e.g., `Shape["n", "m"]`)
-        - Second parameter: Data type (e.g., `int`, `float`, `bool`)
-
-    Examples
-    --------
-    >>> a: NDArray[Shape["n", "m"], float] = np.zeros((3, 4))
-    >>> b: NDArray[Shape[Any, ...], int] = np.array([1, 2, 3])
+        - First parameter: Shape information (e.g., Shape['n', 'm'])
+        - Second parameter: Data type (e.g., int, float, bool)
+    
+    Usage:
+        a: NDArray[Shape['n', 'm'], float]  # 2D array of floats
+        b: NDArray[float]  # any shape of floats
+        c: NDArray  # any array with any shape/dtype
     """
     
     @property
     def shape(self) -> tuple[int, ...]:
         """Shape of the array"""
-        pass
+        ...
 
     @property
     def size(self) -> int:
         """Total number of elements"""
-        pass
+        ...
 
     @property
     def dtype(self) -> Any:
         """Data type of elements"""
-        pass
+        ...
 
     
 
@@ -81,19 +78,17 @@ def main() -> None:
     d: NDArray[Any, float] = np.array([1.0, 2.0, 3.0])
     
     # Test with both Shape and dtype - 2D
-    e: NDArray[Shape["n", "m", ...], float] = np.zeros((3, 4))
+    e: NDArray[Shape[N, N], float] = np.zeros((4, 4))
     
     # Test with variable length shape
-    f: NDArray[tuple[N, ...], int | bool] = np.array([1, 2, 3])
+    f: NDArray[Shape[N], int | bool] = np.array([1, 2, 3])
 
-    # Test with type aliases
-    g: NDArray[Shape[N, M], float] = np.zeros((3, 4))
+    # NOTE: If we use a direct tuple, we can also use `...` in the type hint
+    X: NDArray[tuple[Any, ...], float] = np.zeros((2, 3, 4, 5))
 
-    # Test a number which should return an error
-    h: NDArray[Shape[10], float] = 90
+    Y: NDArray[tuple[N, Any], float] = np.zeros((2, 3, 4, 5))
 
-    # Test a list
-    i: NDArray[Shape[N], float] = [1.0, 2.0, 3.0]
+    g: NDArray[Shape[N, M, K], float] = 6  #  NOTE: This should raise a type checker error
 
     print(a, a.shape, a.size, a.dtype)
     print(c, c.shape, c.size, c.dtype)

@@ -12,7 +12,7 @@ import numpy as np
 # ------ PARAMETERS ------
 
 # Set the options for the integer array
-int_rows, int_cols = 3, 10
+int_rows, int_cols = 2, 10
 
 # Set the options for the floating array
 float_rows, float_cols = 5, 100
@@ -155,7 +155,7 @@ Q = Q_root.T @ Q_root  # Make sure Q is positive semidefinite
 # Print the polytope H-representation
 print("H-representation:")
 np.set_printoptions(suppress=False, precision=1, edgeitems=2)
-print(poly_hrepr(int_array_A, int_array_b, object_type='polytope', include_tabs=True, trunc_mode='both_ellipsis', strip_double_b_brackets=False))  # I think I prefer single_ellipsis here, and not stripping double brackets
+print(poly_hrepr(int_array_A, int_array_b, object_type='polytope', include_tabs=False, trunc_mode='single_ellipsis', strip_double_b_brackets=False))  # I think I prefer single_ellipsis here, and not stripping double brackets
 
 # Print the polytope V-representation
 print("V-representation:")
