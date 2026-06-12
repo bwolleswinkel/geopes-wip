@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class Config:
-    atol: float = 1E-6
+    atol: float = 1E-8
 
 
 CFG: Final[Config] = Config()
@@ -24,16 +24,16 @@ CFG: Final[Config] = Config()
 
 def span(A: NDArray) -> NDArray:
     _, R, P = sp.linalg.qr(A, pivoting=True)
-    rank = np.sum(np.abs(np.diag(R)) > 1e-10)
-    return A[:, P[:rank]]  # FIXME: Does NOT seem to preserve left-to-right order?
+    rank = np.sum(np.abs(np.diag(R)) > CFG.atol)
+    return A[:, sorted(P[:rank])]
 
 
 if __name__ == '__main__':
     # Create the matrix
-    A = np.array([[0, 0, 1, 0],
-                  [0, 1, 0, 0],
-                  [1, 1, 0, 0],
-                  [0, 0, 0, 0]])
+    A = np.array([[1, 0, 0, 0],
+                  [0, 0, 0, 1],
+                  [1, 1, 1, 0],
+                  [0, 0, 0, 1]])
     
     # Extract the basis
     basis = span(A)
