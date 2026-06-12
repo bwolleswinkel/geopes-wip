@@ -8,6 +8,7 @@ from typing import Literal
 import warnings
 
 import numpy as np
+from numpy.typing import NDArray
 
 # ------ PARAMETERS ------
 
@@ -18,7 +19,7 @@ int_rows, int_cols = 2, 10
 float_rows, float_cols = 5, 100
 
 # Set the options for ellipsoid
-n = 5
+n = 50
 
 # Set the maximum number of vertices to print
 max_nverts = 4
@@ -136,6 +137,156 @@ def ellipsoid_semidef_repr(c: np.ndarray, Q: np.ndarray, include_tabs: bool = Tr
         raise NotImplementedError(f"Printing for {object_type} is not yet implemented.")
     return str_header + '\n' + final_str
 
+
+def find(text: str, char: str, remove_consecutive: bool = True, keep_idx: Literal['last', 'first'] = 'last'):
+    indices = [i for i, ltr in enumerate(text) if ltr == char]
+    if remove_consecutive:
+        new_indices = indices
+        nremoved = 0
+        for (idx, val) in enumerate(indices):
+            if idx == 0:
+                continue
+            if val == indices[idx - 1] + 1:
+                match keep_idx:
+                    case 'last':
+                        new_indices.pop(idx - 1)
+                    case 'first':
+                        new_indices.pop(idx)
+                    case _:
+                        raise ValueError(f"Unknown 'keep_idx' strategy '{keep_idx}'")
+                nremoved += 1
+        indices = new_indices
+    return indices, indices[1] - indices[0] - 1
+
+
+def pretty_ellps(A_as_str: str) -> str:
+    # FIXME: Brakes on these examples:
+    # >>> A = np.array([[1, 0],
+    #                   [0, -1]])
+    # [[ 1  0]
+    #  [ 0 -1]]  # Here there is one space in front already...
+    # A = np.array([[1E4, 0],
+    #               [0, -1]])
+    # [[10000.     * ]
+    #  [    0.     * ]]  # FIXME: Here, the space length is always 
+
+    # Find the length of the maximum substring which does not contains the character ' ', '[', or ']', and the substring should not be equal to '...'
+    clean_str = A_as_str.replace('...', ' ')
+    parts = re.split(r'[\[\]\s]+', clean_str)
+    parts = [p for p in parts if p]
+    if not parts:
+        max_space_length = 0
+    max_space_length = max(len(p) for p in parts)
+
+    # TEMP
+    print(f"Max space length: {max_space_length}")
+
+    A_lines = A_as_str.splitlines()
+    try:
+        idx_trunc = A_lines.index(' ...')
+    except ValueError as _:
+        idx_trunc = None
+
+    A_as_str_arr = np.array([list(line)
+                            if line[-2:] == ']]'
+                            else list(line) + ['█']
+                            for line in A_lines if line != ' ...'], dtype=str)  # NOTE: This adds a '█' character at the end of all lines except the last, to make them equal length
+
+    print(f"A_as_str_arr:\n{A_as_str_arr}")
+
+    all_space_cols = []
+    for idx in range(1, A_as_str_arr.shape[1]):
+        if np.all(A_as_str_arr[:, idx] == ' ') and not np.any(A_as_str_arr[:, idx - 1] == '['):  # NOTE: The last check specifically target the case:
+            # [[ 1.  * ]
+            #  [ 0. -1.]] # FIXME: This still doesn't catch many edge cases...
+            all_space_cols.append(idx)
+
+    print(f"All space cols: {all_space_cols}")
+
+    # As every line starts with '[[' or ' [' we know the first number footprint starts at the 2 index, and all other number footprints start one after a column with all spaces
+    num_start = [2] + [elem + 1 for elem in all_space_cols]
+
+    print(f"num_start: {num_start}")
+
+    num_length = [num_start[j + 1] - 1 - num_start[j]
+                if j != len(num_start) - 1
+                else A_as_str_arr[0, :].size - 2 - num_start[j]
+                for j in range(len(num_start))]
+
+    print(f"num_length: {num_length}")
+
+    for i in range(A_as_str_arr.shape[0]):
+        for (j, idx_start) in enumerate(num_start):
+            if ''.join(A_as_str_arr[i, idx_start:(idx_start + 3)].tolist()) == '...':
+                continue
+            if j > i + (0 if (idx_trunc is None or i < idx_trunc) else 1):
+                A_as_str_arr[i, idx_start:(idx_start + num_length[j])] = list(f"{'*':^{num_length[j]}}")
+
+    A_list = [''.join(elem).strip('█') for (i, elem) in enumerate(A_as_str_arr.tolist())]
+    if idx_trunc is not None:
+        A_list.insert(idx_trunc, ' ...')
+    final = '\n'.join(A_list)
+
+    print(f"final:\n{final}")
+
+    return final
+
+
+# This seems to be working robustly!
+def pretty_ellps_v2(A_as_str: str) -> str:
+    # NOTE: This function works under the assumption that the 'footprint' of each number in the NumPy print format is consistent across all numbers, and that the footprint is determined by the longest number (in terms of characters) in the array.
+
+    # Find the length of the maximum substring which does not contains the character ' ', '[', or ']', and the substring should not be equal to '...'
+    parts = [p for p in re.split(r'[\[\]\s]+', A_as_str.replace('...', ' ')) if p]
+    if not parts:
+        warnings.warn("Could not determine the number length, possibly a bug. Returning the original array.")
+        return A_as_str
+    num_length = max(len(p) for p in parts)
+
+    A_lines = A_as_str.splitlines()
+    try:
+        idx_trunc = A_lines.index(' ...')
+    except ValueError as _:
+        idx_trunc = None
+
+    # NOTE: This adds a '█' character at the end of all lines except the last, to make them equal length
+    A_as_str_arr = np.array([list(line)
+                            if line[-2:] == ']]'
+                            else list(line) + ['█']
+                            for line in A_lines if line != ' ...'], dtype=str)
+
+    for i in range(A_as_str_arr.shape[0]):
+        j, idx_start = 0, 2
+        while idx_start + num_length < A_as_str_arr[i, :].size:
+            if ''.join(A_as_str_arr[i, idx_start:(idx_start + 3)].tolist()) == '...':
+                idx_start += 4
+            else: 
+                if j > i + (0 if (idx_trunc is None or i < idx_trunc) else 1):
+                    A_as_str_arr[i, idx_start:(idx_start + num_length)] = list(f"{'*':^{num_length}}")
+                idx_start += num_length + 1
+            j += 1
+
+    A_list = [''.join(elem).strip('█') for (i, elem) in enumerate(A_as_str_arr.tolist())]
+    if idx_trunc is not None:
+        A_list.insert(idx_trunc, ' ...')
+    return '\n'.join(A_list)
+
+
+def full_ellps(c: NDArray, Q: NDArray) -> str:
+    # ======
+    c_as_str, Q_as_str = str(c), str(Q)
+    c_lines, Q_lines = c_as_str.splitlines(), Q_as_str.splitlines()
+    nlines = len(c_lines)
+    try:
+        idx_trunc = c_lines.index(' ...')
+    except ValueError as _:
+        idx_trunc = None
+    idx_text = nlines - (2
+                         if (nlines <= 2 or (nlines == 3 and idx_trunc is not None))
+                         else 3)
+    c_text = ['   ' if idx != idx_text else 'c: ' for idx in range(nlines)]
+
+
 # ------ SCRIPT ------
 
 # Create an integer array
@@ -164,5 +315,32 @@ print(poly_vrepr(float_array_verts, object_type='polytope', include_tabs=True, t
 
 # Print the ellipsoid semidefinite representation
 print("Ellipsoid semidefinite representation:")
-np.set_printoptions(suppress=False, precision=3, edgeitems=2)
+np.set_printoptions(suppress=False, precision=1, edgeitems=2)
 print(ellipsoid_semidef_repr(c, Q, include_tabs=True, filter_sym_part=True, object_type='ellipsoid'))
+
+# === PRINT STANDALONE ===
+
+# A = np.random.rand(100, 100) * 1E-8
+A = np.random.rand(100, 100) * 1E12
+# A = np.array([[1, 0],
+#               [0, -1]])
+# A = np.array([[1E4, 0],
+#               [0, -1]])
+# A = np.random.randint(0, 2, (300, 300)).astype(bool)
+
+with np.printoptions(suppress=True, precision=0, edgeitems=1, linewidth=1E5):
+    A_as_str = str(A)
+
+print("=== STANDALONE ===")
+print(f"A_as_str:\n{A_as_str}")
+print(f"With *: \n{pretty_ellps_v2(A_as_str)}")
+
+# === TEST STRING ZIP ===
+
+spaces = [' ' for _ in range(5)]
+letters = ['A', 'B', 'C', 'D', 'E']
+empty = ['  ', '  ', '  ', ', ', '  ']
+
+final = [''.join(line) for line in zip(spaces, letters, empty)]
+
+print('\n'.join(final))
