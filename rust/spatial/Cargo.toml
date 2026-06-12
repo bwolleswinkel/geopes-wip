@@ -1,0 +1,20 @@
+[package]
+name = "spatial"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "rspatial"
+crate-type = ["cdylib"]
+
+[dependencies]
+# Disable default features to drop the GMP/C-library system dependencies
+# NOTE: I had to do `brew install llvm`, and also in `.vscdoe/settings.json` add:
+# "terminal.integrated.env.osx": {
+#     "PATH": "/opt/homebrew/opt/llvm/bin:${env:PATH}"
+# }
+cddlib-rs = { version = "0.3", default-features = false, features = ["f64"] }
+nalgebra = "0.33"
+num-traits = "0.2"
+pyo3 = { version = "0.23", features = ["extension-module"] }
+numpy = "0.23"
